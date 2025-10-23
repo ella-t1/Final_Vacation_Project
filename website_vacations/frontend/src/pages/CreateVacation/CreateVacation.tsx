@@ -1,4 +1,4 @@
-import React from 'react'
+import "./CreateVacation.scss"
 
 const CreateVacation = () => {
   return (

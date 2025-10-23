@@ -1,14 +1,14 @@
-@import './variables';
+@use './variables' as vars;
 
 body {
-  font-family: $font-main;
-  background-color: $color-bg;
+  font-family: vars.$font-main;
+  background-color: vars.$color-bg;
   margin: 0;
-  color: $color-gray;
+  color:vars.$color-gray;
 }
 
 a {
-  color: $color-primary;
+  color: vars.$color-primary;
   text-decoration: none;
 
   &:hover {

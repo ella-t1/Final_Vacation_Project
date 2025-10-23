@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import './Nav.scss';
 
 const Nav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const handleToggle = () => setMenuOpen(!menuOpen);
+  const handleLinkClick = () => setMenuOpen(false);
+
   return (
     <nav className="nav">
-      <div className="nav__logo">VacationApp</div>
+      <div className="nav__logo">
+        <NavLink to="/" onClick={handleLinkClick}>VacationApp</NavLink>
+      </div>
 
-      <button 
-        className={`nav__toggle ${menuOpen ? 'active' : ''}`} 
-        onClick={() => setMenuOpen(!menuOpen)}
+      <button
+        className={`nav__toggle ${menuOpen ? 'active' : ''}`}
+        onClick={handleToggle}
         aria-label="Toggle menu"
       >
         <span className="bar"></span>
@@ -19,13 +25,22 @@ const Nav = () => {
       </button>
 
       <ul className={`nav__links ${menuOpen ? 'open' : ''}`}>
-        <li><a href="/">Home</a></li>
-        <li><a href="/destinations">Destinations</a></li>
-        <li><a href="/about">About</a></li>
-        <li className="nav__mobile-login"><a href="/login">Login</a></li>
+        <li>
+          <NavLink to="/" end onClick={handleLinkClick}>
+            Home
+          </NavLink>
+        </li>
+        <li className="nav__mobile-login">
+          <NavLink to="/login" onClick={handleLinkClick}>
+            Login
+          </NavLink>
+        </li>
+        <li className="nav__mobile-login">
+          <NavLink to="/signup" onClick={handleLinkClick}>
+            Signup
+          </NavLink>
+        </li>
       </ul>
-
-      <button className="nav__login">Login</button>
     </nav>
   );
 };

@@ -1,5 +1,4 @@
-import React from 'react'
-
+import "./EditVacation.scss"
 const EditVacation = () => {
   return (
     <div>EditVacation</div>

@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .nav {
   display: flex;
@@ -10,12 +10,22 @@
   position: relative;
   z-index: 100;
 
+  // === Logo ===
   &__logo {
     font-size: 1.2rem;
     font-weight: 600;
-    color: $color-primary;
+
+    a {
+      color: $color-primary;
+      text-decoration: none;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
   }
 
+  // === Links ===
   &__links {
     list-style: none;
     display: flex;
@@ -27,13 +37,20 @@
       color: $color-gray;
       font-weight: 500;
       text-decoration: none;
+      transition: color 0.2s ease;
 
       &:hover {
         color: $color-primary;
       }
+
+      &.active {
+        color: $color-primary;
+        font-weight: 600;
+      }
     }
   }
 
+  // === Login Button (desktop) ===
   &__login {
     background-color: $color-primary;
     color: $color-white;
@@ -41,15 +58,15 @@
     border-radius: 6px;
     padding: 8px 16px;
     font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
 
     &:hover {
       opacity: 0.9;
     }
   }
 
-  // Hamburger button
+  // === Hamburger toggle ===
   &__toggle {
     display: none;
     flex-direction: column;
@@ -80,7 +97,7 @@
     }
   }
 
-  // Mobile styles
+  // === Mobile Menu ===
   @media (max-width: 768px) {
     &__links {
       position: absolute;
@@ -93,6 +110,10 @@
       border-top: 1px solid $color-border;
       padding: $spacing-md 0;
       display: none;
+
+      a {
+        padding: $spacing-sm 0;
+      }
     }
 
     &__links.open {
