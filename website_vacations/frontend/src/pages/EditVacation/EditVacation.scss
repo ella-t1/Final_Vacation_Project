@@ -1,0 +1,84 @@
+@use "../../styles/variables" as *;
+
+.edit-vacation {
+
+  &__title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: $color-primary;
+    text-align: center;
+    margin-bottom: $spacing-md;
+  }
+
+  &__image-box {
+    position: relative;
+    border: 1px solid $color-border;
+    border-radius: 6px;
+    background-color: $color-bg;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    .overlay {
+      position: relative;
+      cursor: pointer;
+
+      &::after {
+        content: "Change Image";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.45);
+        color: $color-white;
+        font-weight: 500;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      &:hover::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  &__preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__button {
+    background-color: $color-primary;
+    color: $color-white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: 600;
+    margin-top: $spacing-sm;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  &__cancel {
+    background-color: transparent;
+    border: 1px solid $color-border;
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: 500;
+    color: $color-gray;
+    margin-top: $spacing-md;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f8f8f8;
+    }
+  }
+}

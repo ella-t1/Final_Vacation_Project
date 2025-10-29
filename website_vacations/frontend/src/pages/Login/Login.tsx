@@ -1,11 +1,14 @@
+import { CONSTS } from "../../consts/consts";
 import "./Login.scss";
 import { NavLink } from "react-router-dom";
 
 const Login = () => {
+  const {MAIN_TITLE, SUB_TITLE, NO_ACCOUNT, SIGNUP} = CONSTS.LOGIN;
+
   return (
     <div className="login">
       <div className="login__card">
-        <h1 className="login__logo">VacationApp</h1>
+        <h1 className="login__logo">{MAIN_TITLE}</h1>
 
         <form className="login__form">
           <input type="text" placeholder="Email" className="login__input" />
@@ -16,13 +19,13 @@ const Login = () => {
           />
 
           <button type="submit" className="login__button">
-            Log In
+           {SUB_TITLE}
           </button>
         </form>
         <p className="login__signup">
-          Don’t have an account?{" "}
+          {NO_ACCOUNT}{" "}
           <NavLink to="/signup" end>
-            Signup
+            {SIGNUP}
           </NavLink>
         </p>
       </div>
