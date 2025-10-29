@@ -34,7 +34,7 @@ let router = createBrowserRouter([
         element: <CreateVacation/>,
       },
       {
-        path: "/edit-vacation/:id",
+        path: "/edit-vacation",
         element: <EditVacation/>,
       }
     ]

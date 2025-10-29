@@ -1,43 +1,66 @@
 import { CONSTS } from "../../consts/consts";
-import "./EditVacation.scss";
 import { useState, useEffect } from "react";
-
+import "./EditVacation.scss"
 interface VacationData {
   country: string;
   description: string;
   startDate: string;
   endDate: string;
-  price: number;
-  image: string;
+  price: string;
+  image: File | null;
 }
 
 const EditVacation = () => {
   const [vacation, setVacation] = useState<VacationData>({
-    country: "Rhodes",
-    description:
-      "It's time to take a break and enjoy a cocktail by the sea on a Rhodes vacation. Incredible seaside views are there for the taking on a...",
-    startDate: "2022-11-08",
-    endDate: "2022-11-22",
-    price: 462,
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80",
+    country: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    price: "",
+    image: null,
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const {TITLE, COUNTRY_LABEL, COUNTRY_PLACEHOLDER, DESCRIPTION_LABEL, START_LABEL, END_LABEL, PRICE_LABEL, CURRENCY_SYMBOL, COVER_LABEL, CHANGE_IMAGE, SELECT_IMAGE, UPDATE_BUTTON, CANCEL_BUTTON, COUNTRY_OPTIONS} = CONSTS.EDIT_VACATIONS;
 
+  const {
+    TITLE,
+    COUNTRY_LABEL,
+    COUNTRY_PLACEHOLDER,
+    DESCRIPTION_LABEL,
+    START_LABEL,
+    END_LABEL,
+    PRICE_LABEL,
+    CURRENCY_SYMBOL,
+    COVER_LABEL,
+    CHANGE_IMAGE,
+    SELECT_IMAGE,
+    UPDATE_BUTTON,
+    CANCEL_BUTTON,
+    COUNTRY_OPTIONS,
+  } = CONSTS.EDIT_VACATIONS;
+
+  // ✅ Convert File to preview URL if exists
   useEffect(() => {
-    setImagePreview(vacation.image);
+    if (vacation.image) {
+      const objectUrl = URL.createObjectURL(vacation.image);
+      setImagePreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl); // cleanup
+    } else {
+      setImagePreview(null);
+    }
   }, [vacation.image]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setImagePreview(URL.createObjectURL(file));
+    if (file) {
+      setVacation((prev) => ({ ...prev, image: file }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Updated vacation:", vacation);
+    // TODO: send update to backend
   };
 
   return (
@@ -46,6 +69,7 @@ const EditVacation = () => {
         <h2 className="edit-vacation__title">{TITLE}</h2>
 
         <form className="edit-vacation__form" onSubmit={handleSubmit}>
+          {/* Country */}
           <div className="edit-vacation__group">
             <label htmlFor="country">{COUNTRY_LABEL}</label>
             <select
@@ -56,9 +80,7 @@ const EditVacation = () => {
                 setVacation({ ...vacation, country: e.target.value })
               }
             >
-              <option value="">
-                {COUNTRY_PLACEHOLDER}
-              </option>
+              <option value="">{COUNTRY_PLACEHOLDER}</option>
               {COUNTRY_OPTIONS.map((country) => (
                 <option key={country} value={country}>
                   {country}
@@ -67,10 +89,9 @@ const EditVacation = () => {
             </select>
           </div>
 
+          {/* Description */}
           <div className="edit-vacation__group">
-            <label htmlFor="description">
-              {DESCRIPTION_LABEL}
-            </label>
+            <label htmlFor="description">{DESCRIPTION_LABEL}</label>
             <textarea
               id="description"
               className="edit-vacation__textarea"
@@ -81,11 +102,10 @@ const EditVacation = () => {
             ></textarea>
           </div>
 
+          {/* Dates */}
           <div className="edit-vacation__dates">
             <div className="edit-vacation__group">
-              <label htmlFor="start">
-                {START_LABEL}
-              </label>
+              <label htmlFor="start">{START_LABEL}</label>
               <input
                 type="date"
                 id="start"
@@ -111,6 +131,7 @@ const EditVacation = () => {
             </div>
           </div>
 
+          {/* Price */}
           <div className="edit-vacation__group">
             <label htmlFor="price">{PRICE_LABEL}</label>
             <div className="edit-vacation__price">
@@ -121,12 +142,13 @@ const EditVacation = () => {
                 className="edit-vacation__input"
                 value={vacation.price}
                 onChange={(e) =>
-                  setVacation({ ...vacation, price: Number(e.target.value) })
+                  setVacation({ ...vacation, price: e.target.value })
                 }
               />
             </div>
           </div>
 
+          {/* Image */}
           <div className="edit-vacation__group">
             <label htmlFor="cover">{COVER_LABEL}</label>
             <div className="edit-vacation__image-box">
@@ -157,6 +179,7 @@ const EditVacation = () => {
             </div>
           </div>
 
+          {/* Buttons */}
           <button type="submit" className="edit-vacation__button">
             {UPDATE_BUTTON}
           </button>
