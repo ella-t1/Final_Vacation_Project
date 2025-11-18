@@ -82,7 +82,7 @@ const EditVacation = () => {
       });
 
       if (vacationToEdit.imageName) {
-        setImagePreview(`/images/${vacationToEdit.imageName}`);
+        setImagePreview(`http://localhost:5000/images/${vacationToEdit.imageName}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load vacation");
@@ -126,7 +126,7 @@ const EditVacation = () => {
         startDate: vacation.startDate,
         endDate: vacation.endDate,
         price: parseFloat(vacation.price),
-        imageName: vacation.image?.name,
+        imageFile: vacation.image || undefined,
       });
 
       navigate("/");

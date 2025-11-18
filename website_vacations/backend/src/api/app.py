@@ -1,6 +1,7 @@
 """Flask application for Vacations API."""
 
-from flask import Flask
+import os
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 
 from src.api.routes import register_routes
@@ -12,6 +13,16 @@ def create_app() -> Flask:
     
     # Enable CORS for frontend
     CORS(app, origins=["http://localhost:5173", "http://localhost:3000"], supports_credentials=True)
+    
+    # Create images directory if it doesn't exist
+    images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "images")
+    os.makedirs(images_dir, exist_ok=True)
+    
+    # Serve static images
+    @app.route("/images/<filename>")
+    def serve_image(filename):
+        """Serve vacation images."""
+        return send_from_directory(images_dir, filename)
     
     # Register routes
     register_routes(app)

@@ -98,7 +98,7 @@ const CreateVacation = () => {
         startDate: formData.startDate,
         endDate: formData.endDate,
         price: parseFloat(formData.price),
-        imageName: formData.image?.name,
+        imageFile: formData.image || undefined,
       });
 
       navigate("/");

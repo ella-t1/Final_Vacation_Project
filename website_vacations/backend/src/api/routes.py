@@ -107,9 +107,14 @@ def register_routes(app: Flask) -> None:
     # Vacation endpoints
     @app.route("/api/vacations", methods=["GET"])
     def list_vacations():
-        """Get all vacations sorted by start date."""
+        """Get all vacations sorted by start date with likes count."""
         try:
+            from src.dal.like_dao import LikeDAO
+            like_dao = LikeDAO()
+            
             vacations = vacation_service.list_vacations()
+            likes_count = like_dao.get_likes_count_by_vacation()
+            
             vacations_list = []
             for v in vacations:
                 vacations_list.append({
@@ -120,6 +125,7 @@ def register_routes(app: Flask) -> None:
                     "endDate": v.end_date.isoformat() if v.end_date else None,
                     "price": v.price,
                     "imageName": v.image_name,
+                    "likesCount": likes_count.get(v.id, 0),
                 })
             return jsonify(vacations_list), 200
         except Exception as e:
@@ -151,9 +157,38 @@ def register_routes(app: Flask) -> None:
     def create_vacation():
         """Create a new vacation."""
         try:
-            data = request.get_json()
-            if not data:
-                return jsonify({"error": "No data provided"}), 400
+            import os
+            from werkzeug.utils import secure_filename
+            
+            # Check if request has file (multipart/form-data) or JSON
+            if request.files and "image" in request.files:
+                # Handle multipart/form-data with image upload
+                image_file = request.files["image"]
+                data = request.form.to_dict()
+                
+                # Save image if provided
+                image_name = None
+                if image_file and image_file.filename:
+                    # Create images directory
+                    images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "images")
+                    os.makedirs(images_dir, exist_ok=True)
+                    
+                    # Secure filename and save
+                    filename = secure_filename(image_file.filename)
+                    # Add timestamp to avoid conflicts
+                    import time
+                    timestamp = int(time.time())
+                    name, ext = os.path.splitext(filename)
+                    filename = f"{name}_{timestamp}{ext}"
+                    filepath = os.path.join(images_dir, filename)
+                    image_file.save(filepath)
+                    image_name = filename
+            else:
+                # Handle JSON request (backward compatibility)
+                data = request.get_json()
+                if not data:
+                    return jsonify({"error": "No data provided"}), 400
+                image_name = data.get("imageName")
             
             # Parse dates
             start_date = datetime.fromisoformat(data.get("startDate", "")).date()
@@ -165,7 +200,7 @@ def register_routes(app: Flask) -> None:
                 start_date=start_date,
                 end_date=end_date,
                 price=float(data.get("price", 0)),
-                image_name=data.get("imageName"),
+                image_name=image_name,
             )
             
             return jsonify({
@@ -186,9 +221,38 @@ def register_routes(app: Flask) -> None:
     def update_vacation(vacation_id: int):
         """Update an existing vacation."""
         try:
-            data = request.get_json()
-            if not data:
-                return jsonify({"error": "No data provided"}), 400
+            import os
+            from werkzeug.utils import secure_filename
+            
+            # Check if request has file (multipart/form-data) or JSON
+            if request.files and "image" in request.files:
+                # Handle multipart/form-data with image upload
+                image_file = request.files["image"]
+                data = request.form.to_dict()
+                
+                # Save image if provided
+                image_name = None
+                if image_file and image_file.filename:
+                    # Create images directory
+                    images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "images")
+                    os.makedirs(images_dir, exist_ok=True)
+                    
+                    # Secure filename and save
+                    filename = secure_filename(image_file.filename)
+                    # Add timestamp to avoid conflicts
+                    import time
+                    timestamp = int(time.time())
+                    name, ext = os.path.splitext(filename)
+                    filename = f"{name}_{timestamp}{ext}"
+                    filepath = os.path.join(images_dir, filename)
+                    image_file.save(filepath)
+                    image_name = filename
+            else:
+                # Handle JSON request (backward compatibility)
+                data = request.get_json()
+                if not data:
+                    return jsonify({"error": "No data provided"}), 400
+                image_name = data.get("imageName")
             
             # Parse dates if provided
             start_date = None
@@ -205,7 +269,7 @@ def register_routes(app: Flask) -> None:
                 start_date=start_date,
                 end_date=end_date,
                 price=float(data["price"]) if data.get("price") is not None else None,
-                image_name=data.get("imageName"),
+                image_name=image_name,
             )
             
             return jsonify({

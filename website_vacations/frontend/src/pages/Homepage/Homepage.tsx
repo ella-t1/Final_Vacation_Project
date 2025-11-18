@@ -24,7 +24,13 @@ const Homepage = () => {
         api.getVacations(),
         api.getCountries(),
       ]);
-      setVacations(vacationsData);
+      // Sort vacations by start date ascending
+      const sortedVacations = [...vacationsData].sort((a, b) => {
+        const dateA = new Date(a.startDate).getTime();
+        const dateB = new Date(b.startDate).getTime();
+        return dateA - dateB;
+      });
+      setVacations(sortedVacations);
       setCountries(countriesData);
 
       // Load user likes if logged in
@@ -67,6 +73,14 @@ const Homepage = () => {
         await api.likeVacation(user.id, vacationId);
         setLikedVacations((prev) => new Set(prev).add(vacationId));
       }
+      // Reload vacations to update likes count
+      const vacationsData = await api.getVacations();
+      const sortedVacations = [...vacationsData].sort((a, b) => {
+        const dateA = new Date(a.startDate).getTime();
+        const dateB = new Date(b.startDate).getTime();
+        return dateA - dateB;
+      });
+      setVacations(sortedVacations);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to update like");
     }
@@ -131,7 +145,7 @@ const Homepage = () => {
                 {vacation.imageName && (
                   <div className="homepage__image-container">
                     <img
-                      src={`/images/${vacation.imageName}`}
+                      src={`http://localhost:5000/images/${vacation.imageName}`}
                       alt={vacation.description}
                       className="homepage__image"
                       onError={(e) => {
@@ -152,8 +166,13 @@ const Homepage = () => {
                     </span>
                     <span className="homepage__price">${vacation.price}</span>
                   </div>
+                  <div className="homepage__likes-info">
+                    <span className="homepage__likes-count">
+                      ❤️ Like {vacation.likesCount || 0}
+                    </span>
+                  </div>
                   <div className="homepage__actions">
-                    {user && (
+                    {user && user.roleId !== 1 && (
                       <button
                         className={`homepage__like-button ${
                           likedVacations.has(vacation.id) ? "liked" : ""

@@ -17,6 +17,7 @@ export interface Vacation {
   endDate: string;
   price: number;
   imageName?: string;
+  likesCount?: number;
 }
 
 export interface Country {
@@ -125,21 +126,69 @@ class ApiService {
     return this.request<Vacation>(`/vacations/${vacationId}`);
   }
 
-  async createVacation(data: CreateVacationRequest): Promise<Vacation> {
-    return this.request<Vacation>("/vacations", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  async createVacation(data: CreateVacationRequest & { imageFile?: File }): Promise<Vacation> {
+    // If image file is provided, use FormData
+    if (data.imageFile) {
+      const formData = new FormData();
+      formData.append("countryId", data.countryId.toString());
+      formData.append("description", data.description);
+      formData.append("startDate", data.startDate);
+      formData.append("endDate", data.endDate);
+      formData.append("price", data.price.toString());
+      formData.append("image", data.imageFile);
+      
+      const response = await fetch(`${API_BASE_URL}/vacations`, {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(error.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    } else {
+      // Fallback to JSON
+      return this.request<Vacation>("/vacations", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    }
   }
 
   async updateVacation(
     vacationId: number,
-    data: UpdateVacationRequest
+    data: UpdateVacationRequest & { imageFile?: File }
   ): Promise<Vacation> {
-    return this.request<Vacation>(`/vacations/${vacationId}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+    // If image file is provided, use FormData
+    if (data.imageFile) {
+      const formData = new FormData();
+      if (data.countryId !== undefined) formData.append("countryId", data.countryId.toString());
+      if (data.description !== undefined) formData.append("description", data.description);
+      if (data.startDate !== undefined) formData.append("startDate", data.startDate);
+      if (data.endDate !== undefined) formData.append("endDate", data.endDate);
+      if (data.price !== undefined) formData.append("price", data.price.toString());
+      formData.append("image", data.imageFile);
+      
+      const response = await fetch(`${API_BASE_URL}/vacations/${vacationId}`, {
+        method: "PUT",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(error.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    } else {
+      // Fallback to JSON
+      return this.request<Vacation>(`/vacations/${vacationId}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    }
   }
 
   async deleteVacation(vacationId: number): Promise<void> {

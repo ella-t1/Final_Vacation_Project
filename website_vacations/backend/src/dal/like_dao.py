@@ -64,4 +64,23 @@ class LikeDAO(BaseDAO):
         """Delete a like by composite key (user_id, vacation_id)."""
         user_id, vacation_id = composite_key
         return self.delete_by_user_and_vacation(user_id, vacation_id)
+    
+    def count_by_vacation(self, vacation_id: int) -> int:
+        """Count total likes for a specific vacation."""
+        with self._cursor() as cur:
+            cur.execute(
+                "SELECT COUNT(*) FROM likes WHERE vacation_id = %s",
+                (vacation_id,)
+            )
+            result = cur.fetchone()
+            return result["count"] if result else 0
+    
+    def get_likes_count_by_vacation(self) -> dict[int, int]:
+        """Get likes count for all vacations. Returns dict mapping vacation_id to count."""
+        with self._cursor() as cur:
+            cur.execute(
+                "SELECT vacation_id, COUNT(*) as count FROM likes GROUP BY vacation_id"
+            )
+            results = cur.fetchall()
+            return {row["vacation_id"]: row["count"] for row in results}
 
