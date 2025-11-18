@@ -18,6 +18,7 @@ const Nav = () => {
   
   const handleLogout = () => {
     dispatch(clearUser());
+    localStorage.removeItem("auth_user"); // Ensure localStorage is cleared
     navigate("/");
     setMenuOpen(false);
   };

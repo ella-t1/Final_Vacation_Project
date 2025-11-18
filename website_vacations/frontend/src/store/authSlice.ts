@@ -7,9 +7,24 @@ interface AuthState {
   isLoading: boolean;
 }
 
+// Load user from localStorage on initialization
+const loadUserFromStorage = (): User | null => {
+  try {
+    const stored = localStorage.getItem("auth_user");
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error("Failed to load user from localStorage:", error);
+  }
+  return null;
+};
+
+const savedUser = loadUserFromStorage();
+
 const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
+  user: savedUser,
+  isAuthenticated: !!savedUser,
   isLoading: false,
 };
 
@@ -21,11 +36,23 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
       state.isLoading = false;
+      // Save to localStorage
+      try {
+        localStorage.setItem("auth_user", JSON.stringify(action.payload));
+      } catch (error) {
+        console.error("Failed to save user to localStorage:", error);
+      }
     },
     clearUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.isLoading = false;
+      // Remove from localStorage
+      try {
+        localStorage.removeItem("auth_user");
+      } catch (error) {
+        console.error("Failed to remove user from localStorage:", error);
+      }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
