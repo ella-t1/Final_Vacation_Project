@@ -1,6 +1,10 @@
 import { CONSTS } from "../../consts/consts";
 import { useState, useEffect } from "react";
-import "./EditVacation.scss"
+import "./EditVacation.scss";
+import { useParams, useNavigate } from "react-router-dom";
+import { api, Vacation, Country } from "../../utils/api";
+import { useAppSelector } from "../../hooks/useAppSelector";
+
 interface VacationData {
   country: string;
   description: string;
@@ -11,6 +15,10 @@ interface VacationData {
 }
 
 const EditVacation = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const user = useAppSelector((state) => state.auth.user);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [vacation, setVacation] = useState<VacationData>({
     country: "",
     description: "",
@@ -21,6 +29,9 @@ const EditVacation = () => {
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const {
     TITLE,
@@ -36,8 +47,49 @@ const EditVacation = () => {
     SELECT_IMAGE,
     UPDATE_BUTTON,
     CANCEL_BUTTON,
-    COUNTRY_OPTIONS,
   } = CONSTS.EDIT_VACATIONS;
+
+  useEffect(() => {
+    // Check if user is admin
+    if (!user || user.roleId !== 1) {
+      navigate("/");
+      return;
+    }
+    loadData();
+  }, [user, navigate, id]);
+
+  const loadData = async () => {
+    if (!id) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      setIsLoadingData(true);
+      const [vacationToEdit, countriesData] = await Promise.all([
+        api.getVacation(parseInt(id)),
+        api.getCountries(),
+      ]);
+
+      setCountries(countriesData);
+      setVacation({
+        country: vacationToEdit.countryId.toString(),
+        description: vacationToEdit.description,
+        startDate: vacationToEdit.startDate,
+        endDate: vacationToEdit.endDate,
+        price: vacationToEdit.price.toString(),
+        image: null,
+      });
+
+      if (vacationToEdit.imageName) {
+        setImagePreview(`/images/${vacationToEdit.imageName}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load vacation");
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
 
   // ✅ Convert File to preview URL if exists
   useEffect(() => {
@@ -45,8 +97,6 @@ const EditVacation = () => {
       const objectUrl = URL.createObjectURL(vacation.image);
       setImagePreview(objectUrl);
       return () => URL.revokeObjectURL(objectUrl); // cleanup
-    } else {
-      setImagePreview(null);
     }
   }, [vacation.image]);
 
@@ -57,11 +107,43 @@ const EditVacation = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Updated vacation:", vacation);
-    // TODO: send update to backend
+    if (!id) return;
+
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const countryId = parseInt(vacation.country);
+      if (!countryId) {
+        throw new Error("Please select a country");
+      }
+
+      await api.updateVacation(parseInt(id), {
+        countryId,
+        description: vacation.description,
+        startDate: vacation.startDate,
+        endDate: vacation.endDate,
+        price: parseFloat(vacation.price),
+        imageName: vacation.image?.name,
+      });
+
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update vacation");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoadingData) {
+    return (
+      <div className="edit-vacation">
+        <div className="edit-vacation__loading">Loading vacation...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="edit-vacation">
@@ -69,6 +151,7 @@ const EditVacation = () => {
         <h2 className="edit-vacation__title">{TITLE}</h2>
 
         <form className="edit-vacation__form" onSubmit={handleSubmit}>
+          {error && <div className="edit-vacation__error">{error}</div>}
           {/* Country */}
           <div className="edit-vacation__group">
             <label htmlFor="country">{COUNTRY_LABEL}</label>
@@ -79,11 +162,13 @@ const EditVacation = () => {
               onChange={(e) =>
                 setVacation({ ...vacation, country: e.target.value })
               }
+              required
+              disabled={isLoading}
             >
               <option value="">{COUNTRY_PLACEHOLDER}</option>
-              {COUNTRY_OPTIONS.map((country) => (
-                <option key={country} value={country}>
-                  {country}
+              {countries.map((country) => (
+                <option key={country.id} value={country.id}>
+                  {country.name}
                 </option>
               ))}
             </select>
@@ -99,6 +184,8 @@ const EditVacation = () => {
               onChange={(e) =>
                 setVacation({ ...vacation, description: e.target.value })
               }
+              required
+              disabled={isLoading}
             ></textarea>
           </div>
 
@@ -114,6 +201,8 @@ const EditVacation = () => {
                 onChange={(e) =>
                   setVacation({ ...vacation, startDate: e.target.value })
                 }
+                required
+                disabled={isLoading}
               />
             </div>
 
@@ -127,6 +216,9 @@ const EditVacation = () => {
                 onChange={(e) =>
                   setVacation({ ...vacation, endDate: e.target.value })
                 }
+                required
+                disabled={isLoading}
+                min={vacation.startDate}
               />
             </div>
           </div>
@@ -144,6 +236,11 @@ const EditVacation = () => {
                 onChange={(e) =>
                   setVacation({ ...vacation, price: e.target.value })
                 }
+                required
+                min="0"
+                max="10000"
+                step="0.01"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -180,8 +277,8 @@ const EditVacation = () => {
           </div>
 
           {/* Buttons */}
-          <button type="submit" className="edit-vacation__button">
-            {UPDATE_BUTTON}
+          <button type="submit" className="edit-vacation__button" disabled={isLoading}>
+            {isLoading ? "Updating..." : UPDATE_BUTTON}
           </button>
           <button
             type="button"

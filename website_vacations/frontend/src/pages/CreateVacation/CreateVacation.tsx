@@ -1,6 +1,9 @@
 import { CONSTS } from "../../consts/consts";
 import "./CreateVacation.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api, Country } from "../../utils/api";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../hooks/useAppSelector";
 
 interface VacationForm {
   country: string;
@@ -27,9 +30,11 @@ const CreateVacation = () => {
     SELECT_IMAGE,
     ADD_BUTTON,
     CANCEL_BUTTON,
-    COUNTRY_OPTIONS,
   } = CONSTS.CREATE_VACATIONS;
 
+  const user = useAppSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+  const [countries, setCountries] = useState<Country[]>([]);
   const [formData, setFormData] = useState<VacationForm>({
     country: "",
     description: "",
@@ -40,6 +45,26 @@ const CreateVacation = () => {
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Check if user is admin
+    if (!user || user.roleId !== 1) {
+      navigate("/");
+      return;
+    }
+    loadCountries();
+  }, [user, navigate]);
+
+  const loadCountries = async () => {
+    try {
+      const countriesData = await api.getCountries();
+      setCountries(countriesData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load countries");
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -56,9 +81,32 @@ const CreateVacation = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Vacation submitted:", formData);
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const countryId = parseInt(formData.country);
+      if (!countryId) {
+        throw new Error("Please select a country");
+      }
+
+      await api.createVacation({
+        countryId,
+        description: formData.description,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        price: parseFloat(formData.price),
+        imageName: formData.image?.name,
+      });
+
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create vacation");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,6 +115,7 @@ const CreateVacation = () => {
         <h2 className="create-vacation__title">{TITLE}</h2>
 
         <form className="create-vacation__form" onSubmit={handleSubmit}>
+          {error && <div className="create-vacation__error">{error}</div>}
           {/* Country */}
           <div className="create-vacation__group">
             <label htmlFor="country">{COUNTRY_LABEL}</label>
@@ -75,11 +124,13 @@ const CreateVacation = () => {
               className="create-vacation__input"
               value={formData.country}
               onChange={handleChange}
+              required
+              disabled={isLoading}
             >
               <option value="">{COUNTRY_PLACEHOLDER}</option>
-              {COUNTRY_OPTIONS.map((country) => (
-                <option key={country} value={country}>
-                  {country}
+              {countries.map((country) => (
+                <option key={country.id} value={country.id}>
+                  {country.name}
                 </option>
               ))}
             </select>
@@ -94,6 +145,8 @@ const CreateVacation = () => {
               placeholder={DESCRIPTION_PLACEHOLDER}
               value={formData.description}
               onChange={handleChange}
+              required
+              disabled={isLoading}
             ></textarea>
           </div>
 
@@ -107,6 +160,9 @@ const CreateVacation = () => {
                 className="create-vacation__input"
                 value={formData.startDate}
                 onChange={handleChange}
+                required
+                disabled={isLoading}
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
 
@@ -118,6 +174,9 @@ const CreateVacation = () => {
                 className="create-vacation__input"
                 value={formData.endDate}
                 onChange={handleChange}
+                required
+                disabled={isLoading}
+                min={formData.startDate || new Date().toISOString().split('T')[0]}
               />
             </div>
           </div>
@@ -134,6 +193,11 @@ const CreateVacation = () => {
                 placeholder={PRICE_PLACEHOLDER}
                 value={formData.price}
                 onChange={handleChange}
+                required
+                min="0"
+                max="10000"
+                step="0.01"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -164,8 +228,8 @@ const CreateVacation = () => {
           </div>
 
           {/* Buttons */}
-          <button type="submit" className="create-vacation__button">
-            {ADD_BUTTON}
+          <button type="submit" className="create-vacation__button" disabled={isLoading}>
+            {isLoading ? "Creating..." : ADD_BUTTON}
           </button>
           <button
             type="button"

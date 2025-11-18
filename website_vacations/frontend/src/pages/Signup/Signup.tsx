@@ -1,20 +1,43 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Signup.scss";
 import { CONSTS } from "../../consts/consts";
 import { useState } from "react";
+import { api } from "../../utils/api";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { setUser } from "../../store/authSlice";
 
 const Signup = () => {
   const {SUB_TITLE, FIRST_NAME_LABEL, LAST_NAME_LABEL, EMAIL_LABEL, PASSWORD_LABEL,BUTTON,ALREADY_MEMBER,LOGIN} = CONSTS.SIGNUP;
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setForm({ ...form, [id]: value });
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
-    console.log(form)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const user = await api.register({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+      });
+      dispatch(setUser(user));
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -23,6 +46,7 @@ const Signup = () => {
         <h1 className="signup__title">{SUB_TITLE}</h1>
 
         <form className="signup__form" onSubmit={handleSubmit}>
+          {error && <div className="signup__error">{error}</div>}
           <label htmlFor="firstName">{FIRST_NAME_LABEL}</label>
           <input
             id="firstName"
@@ -31,6 +55,8 @@ const Signup = () => {
             className="signup__input"
             onChange={handleChange}
             value={form.firstName}
+            required
+            disabled={isLoading}
           />
 
           <label htmlFor="lastName">{LAST_NAME_LABEL}</label>
@@ -41,6 +67,8 @@ const Signup = () => {
             className="signup__input"
             onChange={handleChange}
             value={form.lastName}
+            required
+            disabled={isLoading}
           />
 
           <label htmlFor="email">{EMAIL_LABEL}</label>
@@ -51,6 +79,8 @@ const Signup = () => {
             className="signup__input"
             onChange={handleChange}
             value={form.email}
+            required
+            disabled={isLoading}
           />
 
           <label htmlFor="password">{PASSWORD_LABEL}</label>
@@ -61,10 +91,13 @@ const Signup = () => {
             className="signup__input"
             onChange={handleChange}
             value={form.password}
+            required
+            minLength={4}
+            disabled={isLoading}
           />
 
-          <button type="submit" className="signup__button">
-            {BUTTON}
+          <button type="submit" className="signup__button" disabled={isLoading}>
+            {isLoading ? "Registering..." : BUTTON}
           </button>
         </form>
 

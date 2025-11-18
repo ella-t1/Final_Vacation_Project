@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
 import App from './App.tsx'
 import {
   createBrowserRouter,
@@ -10,6 +11,7 @@ import Signup from './pages/Signup/Signup.tsx';
 import Homepage from './pages/Homepage/Homepage.tsx';
 import CreateVacation from './pages/CreateVacation/CreateVacation.tsx';
 import EditVacation from './pages/EditVacation/EditVacation.tsx';
+import { store } from './store/store';
 import "../src/styles/main.scss"
 
 let router = createBrowserRouter([
@@ -34,7 +36,7 @@ let router = createBrowserRouter([
         element: <CreateVacation/>,
       },
       {
-        path: "/edit-vacation",
+        path: "/edit-vacation/:id",
         element: <EditVacation/>,
       }
     ]
@@ -43,6 +45,8 @@ let router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />,
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </StrictMode>,
 )
