@@ -18,7 +18,16 @@ def create_app() -> Flask:
     app.config["SECRET_KEY"] = "your-secret-key-change-in-production"
     
     # Enable CORS for frontend
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://localhost:3001"])
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=[
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:5173",  # Vite default port
+            "http://localhost:5174",  # Vite fallback port
+        ],
+    )
     
     # Register routes
     register_routes(app)

@@ -1,0 +1,37 @@
+// Color Variables
+$primary-color: #667eea;
+$primary-dark: #764ba2;
+$secondary-color: #2c3e50;
+$text-color: #2c3e50;
+$text-light: #7f8c8d;
+$background-light: #f5f7fa;
+$white: #ffffff;
+$error-color: #e74c3c;
+$success-color: #27ae60;
+
+// Gradient
+$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+// Spacing
+$spacing-xs: 0.5rem;
+$spacing-sm: 1rem;
+$spacing-md: 1.5rem;
+$spacing-lg: 2rem;
+$spacing-xl: 3rem;
+
+// Border Radius
+$border-radius-sm: 6px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+
+// Shadows
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+// Breakpoints
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+
