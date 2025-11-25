@@ -18,13 +18,16 @@ const About = () => {
           <div className="about-section">
             <h2>Developer Information</h2>
             <p>
-              <strong>Project:</strong> Full Stack Web Developer - Final Project Part III
+              <strong>Name:</strong> Ella Tubali
             </p>
             <p>
-              <strong>Institution:</strong> John Bryce Training
+              <strong>Project:</strong> Full Stack Web Developer
             </p>
             <p>
-              <strong>Technologies:</strong> React, TypeScript, Redux Toolkit, Flask, PostgreSQL
+              <strong>Institution:</strong> John Bryce 
+            </p>
+            <p>
+              <strong>Technologies:</strong> React.js, TypeScript, Redux Toolkit, Python, Flask, PostgreSQL, Docker
             </p>
           </div>
           <div className="about-section">

@@ -12,7 +12,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     
     # Enable CORS for frontend
-    CORS(app, origins=["http://localhost:5173", "http://localhost:3000"], supports_credentials=True)
+    CORS(app, origins=["http://localhost:5173" , "http://localhost:3000", "http://localhost:3001", "http://localhost:5174"], supports_credentials=True)
     
     # Create images directory if it doesn't exist
     images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "images")
