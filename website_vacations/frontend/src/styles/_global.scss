@@ -1,0 +1,22 @@
+@use './variables' as vars;
+
+body {
+  font-family: vars.$font-main;
+  background-color: vars.$color-bg;
+  margin: 0;
+  color:vars.$color-gray;
+}
+
+a {
+  color: vars.$color-primary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
