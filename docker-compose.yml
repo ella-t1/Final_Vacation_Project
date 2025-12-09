@@ -1,10 +1,8 @@
+version: '3.8'
+
 services:
-  # ===================
-  # DATABASE
-  # ===================
   postgres:
-    image: postgres:15-alpine
-    container_name: vacations_db
+    image: postgres:15
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -13,76 +11,47 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - ./website_vacations/backend/sql:/docker-entrypoint-initdb.d
 
-  # ===================
-  # WEBSITE VACATIONS
-  # ===================
   vacations-backend:
-    build:
-      context: ./website_vacations/backend
-      dockerfile: Dockerfile
-    container_name: vacations_backend
+    build: ./website_vacations/backend
     ports:
       - "5000:5000"
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: vacations
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vacations
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
 
   vacations-frontend:
-    build:
-      context: ./website_vacations/frontend
-      dockerfile: Dockerfile
-    container_name: vacations_frontend
+    build: ./website_vacations/frontend
     ports:
-      - "5174:5174"
-    environment:
-      - VITE_API_URL=http://localhost:5000
+      - "3000:5173"
     depends_on:
       - vacations-backend
 
-  # ===================
-  # STATS WEBSITE
-  # ===================
   stats-backend:
-    build:
-      context: ./stats_website/backend
-      dockerfile: Dockerfile
-    container_name: stats_backend
+    build: ./stats_website/backend
     ports:
       - "5001:5001"
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: vacations
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vacations
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
 
   stats-frontend:
-    build:
-      context: ./stats_website/frontend
-      dockerfile: Dockerfile
-    container_name: stats_frontend
+    build: ./stats_website/frontend
     ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:5001
+      - "3001:5173"
     depends_on:
       - stats-backend
 
 volumes:
   postgres_data:
-
