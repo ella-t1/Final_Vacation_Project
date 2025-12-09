@@ -55,5 +55,5 @@ The entire project is containerized using Docker and can be started with a singl
 
 ## Author
 
-Created as a final project for the full-stack bootcamp.
+Created by Ella Tubaly as a final project.
 
