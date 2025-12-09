@@ -53,6 +53,10 @@ The entire project is containerized using Docker and can be started with a singl
 *   **Database**: PostgreSQL
 *   **Containerization**: Docker, Docker Compose
 
+## Project Demos
+
+Video demonstrations of the project functionality can be found in the `demo/` directory.
+
 ## Author
 
 Created by Ella Tubaly as a final project.
